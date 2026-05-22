@@ -1,18 +1,4 @@
-﻿"""
-scraper/scraper.py
-
-Scrapes Google Scholar author profiles using Tor for IP rotation,
-and stores results directly into MongoDB (same DB the API reads from).
-
-Usage:
-    python scraper/scraper.py
-
-Requires:
-    - Tor installed (set TOR_PATH in .env or defaults to tor on PATH)
-    - MongoDB accessible (set MONGO_URI in .env)
-"""
-
-import time
+﻿import time
 import random
 import os
 from datetime import datetime, timezone
@@ -22,18 +8,13 @@ from scholarly import scholarly, ProxyGenerator
 from pymongo import MongoClient, UpdateOne
 from dotenv import load_dotenv
 
-# Load environment variables from .env at project root
 load_dotenv()
-
-# --- Configuration ---
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "scholar_db")
 TOR_PATH = os.getenv("TOR_PATH", r"D:\tor\tor\tor.exe")
 TOR_SOCKS_PORT = int(os.getenv("TOR_SOCKS_PORT", "9050"))
 TOR_CONTROL_PORT = int(os.getenv("TOR_CONTROL_PORT", "9051"))
-
-# --- Author IDs to scrape ---
 
 AUTHOR_IDS = list(set([
     "Y42jUgYAAAAJ", "edY878AAAAJ", "y0NGrRgAAAAJ", "RPHDOnsAAAAJ",
@@ -47,7 +28,7 @@ AUTHOR_IDS = list(set([
 ]))
 
 
-def infer_pub_type(title: str) -> str:
+def infer_pub_type(title):
     title_lower = title.lower()
     if any(w in title_lower for w in ["conference", "proceedings", "workshop", "symposium"]):
         return "conference"
@@ -88,7 +69,7 @@ def setup_proxy():
     print("Tor connected. IP will rotate automatically if blocked.")
 
 
-def save_to_mongodb(authors_data: list):
+def save_to_mongodb(authors_data):
     client = MongoClient(MONGO_URI)
     db = client[MONGO_DB_NAME]
 
@@ -101,7 +82,6 @@ def save_to_mongodb(authors_data: list):
         author_ops.append(UpdateOne(
             {"_id": author_id},
             {"": {
-                "_id": author_id,
                 "name": author["name"],
                 "affiliation": author.get("affiliation", ""),
                 "total_citations": author.get("total_citations", 0),
@@ -113,12 +93,15 @@ def save_to_mongodb(authors_data: list):
         ))
 
         for article in author.get("articles", []):
+            title = article.get("title", "")
+            if not title:
+                continue
             pub_ops.append(UpdateOne(
-                {"author_id": author_id, "title": article["title"]},
+                {"author_id": author_id, "title": title},
                 {"": {
                     "author_id": author_id,
                     "author_name": author["name"],
-                    "title": article["title"],
+                    "title": title,
                     "year": article.get("year"),
                     "cited_by": article.get("cited_by", 0),
                     "pub_type": article.get("pub_type", "unknown"),
@@ -139,7 +122,7 @@ def save_to_mongodb(authors_data: list):
     client.close()
 
 
-def scrape_author(author_id: str):
+def scrape_author(author_id):
     try:
         author_query = scholarly.search_author_id(author_id)
         author = scholarly.fill(author_query, sections=['basics', 'indices', 'publications'])
