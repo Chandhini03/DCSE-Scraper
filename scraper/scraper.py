@@ -81,7 +81,7 @@ def save_to_mongodb(authors_data):
 
         author_ops.append(UpdateOne(
             {"_id": author_id},
-            {"": {
+            {"$set": {
                 "name": author["name"],
                 "affiliation": author.get("affiliation", ""),
                 "total_citations": author.get("total_citations", 0),
@@ -98,7 +98,7 @@ def save_to_mongodb(authors_data):
                 continue
             pub_ops.append(UpdateOne(
                 {"author_id": author_id, "title": title},
-                {"": {
+                {"$set": {
                     "author_id": author_id,
                     "author_name": author["name"],
                     "title": title,
