@@ -38,6 +38,9 @@ async def _get_filtered_publications(filters: dict) -> list:
 
     if filters.get("pub_type"):
         query["pub_type"] = filters["pub_type"]
+    else:
+        # Exclude 'unknown' pub_type to match frontend behavior
+        query["pub_type"] = {"$in": ["journal", "conference", "book"]}
 
     if filters.get("author_id"):
         query["author_id"] = filters["author_id"]
@@ -217,34 +220,62 @@ async def export_to_pdf(
         story.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
         story.append(Spacer(1, 12))
         
-        # Create table data
-        table_data = [["Author", "Title", "Year", "Type", "Citations"]]
+        # Styles for table cells
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=10,
+            alignment=0  # Left align
+        )
+        
+        # Create table data with Paragraph objects for proper text wrapping
+        header_style = ParagraphStyle(
+            'HeaderStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.whitesmoke,
+            fontName='Helvetica-Bold',
+            alignment=0
+        )
+        
+        table_data = [
+            [
+                Paragraph("Author", header_style),
+                Paragraph("Title", header_style),
+                Paragraph("Year", header_style),
+                Paragraph("Type", header_style),
+                Paragraph("Citations", header_style)
+            ]
+        ]
         
         for pub in publications:
+            author_name = pub.get("author_name", "")
             title = pub.get("title", "")
-            # Truncate long titles for PDF
-            if len(title) > 50:
-                title = title[:47] + "..."
+            year = str(pub.get("year", ""))
+            pub_type = pub.get("pub_type", "")
+            citations = str(pub.get("cited_by", 0))
             
             table_data.append([
-                pub.get("author_name", "")[:20],
-                title,
-                str(pub.get("year", "")),
-                pub.get("pub_type", ""),
-                str(pub.get("cited_by", 0))
+                Paragraph(author_name, cell_style),
+                Paragraph(title, cell_style),
+                Paragraph(year, cell_style),
+                Paragraph(pub_type, cell_style),
+                Paragraph(citations, cell_style)
             ])
         
-        # Create table
-        table = Table(table_data)
+        # Create table with proper column widths
+        table = Table(table_data, colWidths=[1.2*inch, 2.8*inch, 0.6*inch, 0.9*inch, 0.7*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+            ('LEFTPADDING', (0, 0), (-1, -1), 6),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 6),
             ('GRID', (0, 0), (-1, -1), 1, colors.grey),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F0F0F0')]),
         ]))
         
