@@ -58,7 +58,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Header overview={overview} loading={loadingMeta} />
+      <Header overview={overview} loading={loadingMeta} filters={filters} />
       <div className="content-shell">
         <FilterBar
           filters={filters}
