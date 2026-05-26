@@ -10,6 +10,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
             onChange={(event) =>
               onChange({ searchQuery: event.target.value })
             }
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
             placeholder="Search titles or authors"
           />
         </label>
@@ -20,6 +21,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
             onChange={(event) =>
               onChange({ authorId: event.target.value })
             }
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
           >
             <option value="">All faculty</option>
             {authors.map((author) => (
@@ -36,6 +38,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
             onChange={(event) =>
               onChange({ year: event.target.value })
             }
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
           >
             <option value="">All years</option>
             {years.map((year) => (
@@ -56,6 +59,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
               onChange={(event) =>
                 onChange({ yearFrom: event.target.value })
               }
+              onKeyDown={(e) => e.key === 'Enter' && onApply()}
               placeholder="2020"
             />
           </label>
@@ -65,6 +69,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
               type="number"
               value={filters.yearTo}
               onChange={(event) => onChange({ yearTo: event.target.value })}
+              onKeyDown={(e) => e.key === 'Enter' && onApply()}
               placeholder="2024"
             />
           </label>
@@ -77,6 +82,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
               onChange={(event) =>
                 onChange({ minCitations: event.target.value })
               }
+              onKeyDown={(e) => e.key === 'Enter' && onApply()}
               placeholder="0"
             />
           </label>
@@ -90,6 +96,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
             onChange={(event) =>
               onChange({ sortBy: event.target.value })
             }
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
           >
             <option value="cited_by">Citations</option>
             <option value="year">Year</option>
@@ -102,6 +109,7 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
           <select
             value={filters.order}
             onChange={(event) => onChange({ order: event.target.value })}
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
           >
             <option value="desc">Descending</option>
             <option value="asc">Ascending</option>
