@@ -6,14 +6,29 @@ function PublicationColumn({
   data,
   onLoadMore,
   type,
+  expandedColumn,
+  setExpandedColumn,
 }) {
-  return (
-    <section className={`publication-column ${accentClass}`}>
+  const isExpanded = expandedColumn === type
+
+  // hide this column when a different column is expanded
+  const hiddenWhenOtherExpanded = expandedColumn && !isExpanded
+
+  const ColumnContent = (
+    <>
       <div className="column-header">
         <div>
           <h2>{title}</h2>
           <span className="count-badge">{data.results.length}</span>
         </div>
+        <button
+          type="button"
+          className="expand-button"
+          aria-label={isExpanded ? 'Collapse column' : 'Expand column'}
+          onClick={() => setExpandedColumn(isExpanded ? null : type)}
+        >
+          {isExpanded ? '✕' : '⤢'}
+        </button>
       </div>
       <div className="column-list">
         {data.loading ? (
@@ -45,7 +60,26 @@ function PublicationColumn({
           </button>
         )}
       </div>
-    </section>
+    </>
+  )
+
+  return (
+    <>
+      <section
+        className={`publication-column ${accentClass}`}
+        style={{ display: hiddenWhenOtherExpanded ? 'none' : undefined }}
+      >
+        {ColumnContent}
+      </section>
+
+      {isExpanded && (
+        <div className="expanded-overlay" role="dialog" aria-modal="true">
+          <div className={`publication-column ${accentClass} expanded`}>{/* reuse styles */}
+            {ColumnContent}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 
