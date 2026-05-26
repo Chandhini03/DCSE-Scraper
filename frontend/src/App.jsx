@@ -27,6 +27,7 @@ function App() {
   const [overview, setOverview] = useState(null)
   const [loadingMeta, setLoadingMeta] = useState(true)
   const [metaError, setMetaError] = useState(null)
+  const [expandedColumn, setExpandedColumn] = useState(null)
 
   useEffect(() => {
     const loadMeta = async () => {
@@ -78,6 +79,8 @@ function App() {
             data={journalData}
             onLoadMore={loadMore}
             type="journal"
+            expandedColumn={expandedColumn}
+            setExpandedColumn={setExpandedColumn}
           />
           <PublicationColumn
             title="Conferences"
@@ -85,6 +88,8 @@ function App() {
             data={conferenceData}
             onLoadMore={loadMore}
             type="conference"
+            expandedColumn={expandedColumn}
+            setExpandedColumn={setExpandedColumn}
           />
           <PublicationColumn
             title="Books"
@@ -92,6 +97,8 @@ function App() {
             data={bookData}
             onLoadMore={loadMore}
             type="book"
+            expandedColumn={expandedColumn}
+            setExpandedColumn={setExpandedColumn}
           />
         </div>
       </div>
