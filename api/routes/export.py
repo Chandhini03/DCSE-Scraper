@@ -116,7 +116,7 @@ async def export_to_excel(
         header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
         # Add headers
-        headers = ["Author", "Title", "Year", "Type", "Citations", "Link"]
+        headers = ["Author", "Title", "Year", "Type", "Link"]
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_num)
             cell.value = header
@@ -129,8 +129,7 @@ async def export_to_excel(
         ws.column_dimensions['B'].width = 40
         ws.column_dimensions['C'].width = 10
         ws.column_dimensions['D'].width = 15
-        ws.column_dimensions['E'].width = 12
-        ws.column_dimensions['F'].width = 30
+        ws.column_dimensions['E'].width = 30
         
         # Add data
         for row_num, pub in enumerate(publications, 2):
@@ -138,8 +137,7 @@ async def export_to_excel(
             ws.cell(row=row_num, column=2).value = pub.get("title", "")
             ws.cell(row=row_num, column=3).value = pub.get("year", "")
             ws.cell(row=row_num, column=4).value = pub.get("pub_type", "")
-            ws.cell(row=row_num, column=5).value = pub.get("cited_by", 0)
-            ws.cell(row=row_num, column=6).value = pub.get("link", "")
+            ws.cell(row=row_num, column=5).value = pub.get("link", "")
             
             # Wrap text for title
             ws.cell(row=row_num, column=2).alignment = Alignment(wrap_text=True, vertical="top")
@@ -244,8 +242,7 @@ async def export_to_pdf(
                 Paragraph("Author", header_style),
                 Paragraph("Title", header_style),
                 Paragraph("Year", header_style),
-                Paragraph("Type", header_style),
-                Paragraph("Citations", header_style)
+                Paragraph("Type", header_style)
             ]
         ]
         
@@ -254,18 +251,16 @@ async def export_to_pdf(
             title = pub.get("title", "")
             year = str(pub.get("year", ""))
             pub_type = pub.get("pub_type", "")
-            citations = str(pub.get("cited_by", 0))
             
             table_data.append([
                 Paragraph(author_name, cell_style),
                 Paragraph(title, cell_style),
                 Paragraph(year, cell_style),
-                Paragraph(pub_type, cell_style),
-                Paragraph(citations, cell_style)
+                Paragraph(pub_type, cell_style)
             ])
         
         # Create table with proper column widths
-        table = Table(table_data, colWidths=[1.2*inch, 2.8*inch, 0.6*inch, 0.9*inch, 0.7*inch])
+        table = Table(table_data, colWidths=[1.4*inch, 3.3*inch, 0.7*inch, 1.1*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
