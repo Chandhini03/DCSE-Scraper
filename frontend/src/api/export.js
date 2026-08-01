@@ -12,6 +12,10 @@ export const exportToExcel = async (filters) => {
     params.append('sort_by', filters.sortBy || 'cited_by')
     params.append('order', filters.order || 'desc')
     
+    if (filters.fields && filters.fields.length > 0) {
+      filters.fields.forEach(field => params.append('fields', field))
+    }
+    
     const response = await client.get(`/export/excel?${params.toString()}`, {
       responseType: 'blob'
     })
@@ -55,6 +59,10 @@ export const exportToPdf = async (filters) => {
     if (filters.minCitations) params.append('min_citations', filters.minCitations)
     params.append('sort_by', filters.sortBy || 'cited_by')
     params.append('order', filters.order || 'desc')
+    
+    if (filters.fields && filters.fields.length > 0) {
+      filters.fields.forEach(field => params.append('fields', field))
+    }
     
     const response = await client.get(`/export/pdf?${params.toString()}`, {
       responseType: 'blob'

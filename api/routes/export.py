@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 from fastapi.responses import StreamingResponse
-from typing import Optional
+from typing import Optional, List
 import io
 from datetime import datetime
 from openpyxl import Workbook
@@ -14,12 +14,10 @@ from api.core.database import get_db
 
 router = APIRouter()
 
-
 def _fix_id(doc: dict) -> dict:
     if doc and "_id" in doc:
         doc["_id"] = str(doc["_id"])
     return doc
-
 
 async def _get_filtered_publications(filters: dict) -> list:
     """Fetch all filtered publications (no pagination)"""
@@ -63,12 +61,20 @@ async def _get_filtered_publications(filters: dict) -> list:
 
     pubs = (
         await db.publications.find(query)
-        .sort(sort_by, sort_dir)
+        .sort([("author_name", 1), (sort_by, sort_dir)])
         .to_list(None)  # Fetch all results
     )
 
     return [_fix_id(p) for p in pubs]
 
+FIELD_MAP = {
+    "author_name": {"label": "Author", "width": 25, "pdf_width": 1.2 * inch},
+    "title": {"label": "Title", "width": 40, "pdf_width": 3.0 * inch},
+    "year": {"label": "Year", "width": 10, "pdf_width": 0.6 * inch},
+    "pub_type": {"label": "Type", "width": 15, "pdf_width": 0.8 * inch},
+    "link": {"label": "Link", "width": 30, "pdf_width": 1.2 * inch},
+    "cited_by": {"label": "Citations", "width": 12, "pdf_width": 0.6 * inch},
+}
 
 @router.get("/excel")
 async def export_to_excel(
@@ -82,6 +88,7 @@ async def export_to_excel(
     year_to: Optional[int] = Query(None),
     sort_by: str = Query("cited_by"),
     order: str = Query("desc"),
+    fields: List[str] = Query(None)
 ):
     """
     Export filtered publications to Excel
@@ -105,44 +112,38 @@ async def export_to_excel(
         if not publications:
             raise HTTPException(status_code=404, detail="No publications found matching the filters")
         
-        # Create Excel workbook
+        if not fields:
+            fields = ["author_name", "title", "year", "pub_type", "link"]
+            
+        selected_fields = [f for f in fields if f in FIELD_MAP]
+        
         wb = Workbook()
         ws = wb.active
         ws.title = "Publications"
         
-        # Define styles
         header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF", size=11)
         header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
-        # Add headers
-        headers = ["Author", "Title", "Year", "Type", "Link"]
-        for col_num, header in enumerate(headers, 1):
+        for col_num, field_id in enumerate(selected_fields, 1):
             cell = ws.cell(row=1, column=col_num)
-            cell.value = header
+            cell.value = FIELD_MAP[field_id]["label"]
             cell.fill = header_fill
             cell.font = header_font
             cell.alignment = header_alignment
-        
-        # Set column widths
-        ws.column_dimensions['A'].width = 25
-        ws.column_dimensions['B'].width = 40
-        ws.column_dimensions['C'].width = 10
-        ws.column_dimensions['D'].width = 15
-        ws.column_dimensions['E'].width = 30
-        
-        # Add data
-        for row_num, pub in enumerate(publications, 2):
-            ws.cell(row=row_num, column=1).value = pub.get("author_name", "")
-            ws.cell(row=row_num, column=2).value = pub.get("title", "")
-            ws.cell(row=row_num, column=3).value = pub.get("year", "")
-            ws.cell(row=row_num, column=4).value = pub.get("pub_type", "")
-            ws.cell(row=row_num, column=5).value = pub.get("link", "")
+            col_letter = cell.column_letter
+            ws.column_dimensions[col_letter].width = FIELD_MAP[field_id]["width"]
             
-            # Wrap text for title
-            ws.cell(row=row_num, column=2).alignment = Alignment(wrap_text=True, vertical="top")
+        for row_num, pub in enumerate(publications, 2):
+            for col_num, field_id in enumerate(selected_fields, 1):
+                val = pub.get(field_id, "")
+                cell = ws.cell(row=row_num, column=col_num)
+                cell.value = str(val) if val is not None else ""
+                if field_id == "title":
+                    cell.alignment = Alignment(wrap_text=True, vertical="top")
+                else:
+                    cell.alignment = Alignment(vertical="top")
         
-        # Save to bytes
         excel_buffer = io.BytesIO()
         wb.save(excel_buffer)
         excel_buffer.seek(0)
@@ -174,6 +175,7 @@ async def export_to_pdf(
     year_to: Optional[int] = Query(None),
     sort_by: str = Query("cited_by"),
     order: str = Query("desc"),
+    fields: List[str] = Query(None)
 ):
     """
     Export filtered publications to PDF
@@ -196,13 +198,17 @@ async def export_to_pdf(
         
         if not publications:
             raise HTTPException(status_code=404, detail="No publications found matching the filters")
+            
+        if not fields:
+            fields = ["author_name", "title", "year", "pub_type"]
+            
+        selected_fields = [f for f in fields if f in FIELD_MAP]
         
-        # Create PDF
         pdf_buffer = io.BytesIO()
+        # Use landscape for more columns if needed, but letter is fine for now
         doc = SimpleDocTemplate(pdf_buffer, pagesize=letter)
         story = []
         
-        # Styles
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
             'CustomTitle',
@@ -210,24 +216,21 @@ async def export_to_pdf(
             fontSize=18,
             textColor=colors.HexColor('#4472C4'),
             spaceAfter=12,
-            alignment=1  # Center
+            alignment=1
         )
         
-        # Title
         story.append(Paragraph("DCSE Faculty Publications Export", title_style))
         story.append(Paragraph(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal']))
         story.append(Spacer(1, 12))
         
-        # Styles for table cells
         cell_style = ParagraphStyle(
             'CellStyle',
             parent=styles['Normal'],
             fontSize=8,
             leading=10,
-            alignment=0  # Left align
+            alignment=0
         )
         
-        # Create table data with Paragraph objects for proper text wrapping
         header_style = ParagraphStyle(
             'HeaderStyle',
             parent=styles['Normal'],
@@ -237,30 +240,28 @@ async def export_to_pdf(
             alignment=0
         )
         
-        table_data = [
-            [
-                Paragraph("Author", header_style),
-                Paragraph("Title", header_style),
-                Paragraph("Year", header_style),
-                Paragraph("Type", header_style)
-            ]
-        ]
+        # Headers
+        header_row = [Paragraph(FIELD_MAP[f]["label"], header_style) for f in selected_fields]
+        table_data = [header_row]
         
+        # Data
         for pub in publications:
-            author_name = pub.get("author_name", "")
-            title = pub.get("title", "")
-            year = str(pub.get("year", ""))
-            pub_type = pub.get("pub_type", "")
+            row = []
+            for f in selected_fields:
+                val = str(pub.get(f, ""))
+                row.append(Paragraph(val, cell_style))
+            table_data.append(row)
             
-            table_data.append([
-                Paragraph(author_name, cell_style),
-                Paragraph(title, cell_style),
-                Paragraph(year, cell_style),
-                Paragraph(pub_type, cell_style)
-            ])
+        col_widths = [FIELD_MAP[f]["pdf_width"] for f in selected_fields]
         
-        # Create table with proper column widths
-        table = Table(table_data, colWidths=[1.4*inch, 3.3*inch, 0.7*inch, 1.1*inch])
+        # If total width exceeds page, scale down proportionally
+        total_width = sum(col_widths)
+        available_width = letter[0] - doc.leftMargin - doc.rightMargin
+        if total_width > available_width:
+            scale_factor = available_width / total_width
+            col_widths = [w * scale_factor for w in col_widths]
+        
+        table = Table(table_data, colWidths=col_widths)
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4472C4')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -278,7 +279,6 @@ async def export_to_pdf(
         story.append(Spacer(1, 12))
         story.append(Paragraph(f"<b>Total Publications: {len(publications)}</b>", styles['Normal']))
         
-        # Build PDF
         doc.build(story)
         pdf_buffer.seek(0)
         
