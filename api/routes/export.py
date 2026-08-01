@@ -116,7 +116,7 @@ async def export_to_excel(
         header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         
         # Add headers
-        headers = ["Author", "Title", "Year", "Type", "Citations", "Link"]
+        headers = ["Faculty name", "Name of the title", "Author Names", "Name of the Journal", "Year"]
         for col_num, header in enumerate(headers, 1):
             cell = ws.cell(row=1, column=col_num)
             cell.value = header
@@ -127,19 +127,17 @@ async def export_to_excel(
         # Set column widths
         ws.column_dimensions['A'].width = 25
         ws.column_dimensions['B'].width = 40
-        ws.column_dimensions['C'].width = 10
-        ws.column_dimensions['D'].width = 15
-        ws.column_dimensions['E'].width = 12
-        ws.column_dimensions['F'].width = 30
+        ws.column_dimensions['C'].width = 30
+        ws.column_dimensions['D'].width = 30
+        ws.column_dimensions['E'].width = 10
         
         # Add data
         for row_num, pub in enumerate(publications, 2):
             ws.cell(row=row_num, column=1).value = pub.get("author_name", "")
             ws.cell(row=row_num, column=2).value = pub.get("title", "")
-            ws.cell(row=row_num, column=3).value = pub.get("year", "")
-            ws.cell(row=row_num, column=4).value = pub.get("pub_type", "")
-            ws.cell(row=row_num, column=5).value = pub.get("cited_by", 0)
-            ws.cell(row=row_num, column=6).value = pub.get("link", "")
+            ws.cell(row=row_num, column=3).value = pub.get("authors", "")
+            ws.cell(row=row_num, column=4).value = pub.get("journal", "")
+            ws.cell(row=row_num, column=5).value = pub.get("year", "")
             
             # Wrap text for title
             ws.cell(row=row_num, column=2).alignment = Alignment(wrap_text=True, vertical="top")

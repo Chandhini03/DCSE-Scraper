@@ -9,8 +9,8 @@ export const exportToExcel = async (filters) => {
     if (filters.yearTo) params.append('year_to', filters.yearTo)
     if (filters.year) params.append('year', filters.year)
     if (filters.minCitations) params.append('min_citations', filters.minCitations)
-    params.append('sort_by', filters.sortBy || 'cited_by')
-    params.append('order', filters.order || 'desc')
+    params.append('sort_by', filters.sortBy || 'author_name')
+    params.append('order', filters.order || 'asc')
     
     const response = await client.get(`/export/excel?${params.toString()}`, {
       responseType: 'blob'
