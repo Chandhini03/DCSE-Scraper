@@ -48,6 +48,21 @@ function FilterBar({ filters, authors, years, onChange, onApply, onReset }) {
             ))}
           </select>
         </label>
+        <label>
+          Type
+          <select
+            value={filters.pubType || ""}
+            onChange={(event) =>
+              onChange({ pubType: event.target.value })
+            }
+            onKeyDown={(e) => e.key === 'Enter' && onApply()}
+          >
+            <option value="">All publications</option>
+            <option value="journal">Journals only</option>
+            <option value="conference">Conferences only</option>
+            <option value="book">Books only</option>
+          </select>
+        </label>
       </div>
       {!filters.year && (
         <div className="filter-row">

@@ -68,12 +68,12 @@ async def _get_filtered_publications(filters: dict) -> list:
     return [_fix_id(p) for p in pubs]
 
 FIELD_MAP = {
-    "author_name": {"label": "Author", "width": 25, "pdf_width": 1.2 * inch},
+    "all_authors": {"label": "Authors", "width": 35, "pdf_width": 1.5 * inch},
     "title": {"label": "Title", "width": 40, "pdf_width": 3.0 * inch},
+    "venue": {"label": "Journal/Conference", "width": 25, "pdf_width": 1.2 * inch},
     "year": {"label": "Year", "width": 10, "pdf_width": 0.6 * inch},
     "pub_type": {"label": "Type", "width": 15, "pdf_width": 0.8 * inch},
     "link": {"label": "Link", "width": 30, "pdf_width": 1.2 * inch},
-    "cited_by": {"label": "Citations", "width": 12, "pdf_width": 0.6 * inch},
 }
 
 @router.get("/excel")
@@ -113,7 +113,7 @@ async def export_to_excel(
             raise HTTPException(status_code=404, detail="No publications found matching the filters")
         
         if not fields:
-            fields = ["author_name", "title", "year", "pub_type", "link"]
+            fields = ["all_authors", "title", "venue", "year", "pub_type", "link"]
             
         selected_fields = [f for f in fields if f in FIELD_MAP]
         
@@ -136,7 +136,10 @@ async def export_to_excel(
             
         for row_num, pub in enumerate(publications, 2):
             for col_num, field_id in enumerate(selected_fields, 1):
-                val = pub.get(field_id, "")
+                if field_id == "all_authors":
+                    val = pub.get("all_authors") or pub.get("author_name", "")
+                else:
+                    val = pub.get(field_id, "")
                 cell = ws.cell(row=row_num, column=col_num)
                 cell.value = str(val) if val is not None else ""
                 if field_id == "title":
@@ -200,7 +203,7 @@ async def export_to_pdf(
             raise HTTPException(status_code=404, detail="No publications found matching the filters")
             
         if not fields:
-            fields = ["author_name", "title", "year", "pub_type"]
+            fields = ["all_authors", "title", "venue", "year", "pub_type"]
             
         selected_fields = [f for f in fields if f in FIELD_MAP]
         
@@ -248,7 +251,11 @@ async def export_to_pdf(
         for pub in publications:
             row = []
             for f in selected_fields:
-                val = str(pub.get(f, ""))
+                if f == "all_authors":
+                    raw_val = pub.get("all_authors") or pub.get("author_name", "")
+                else:
+                    raw_val = pub.get(f, "")
+                val = str(raw_val) if raw_val is not None else ""
                 row.append(Paragraph(val, cell_style))
             table_data.append(row)
             

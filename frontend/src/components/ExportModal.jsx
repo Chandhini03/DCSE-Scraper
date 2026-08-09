@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { exportToExcel, exportToPdf } from '../api/export'
 
 const AVAILABLE_FIELDS = [
-  { id: 'author_name', label: 'Author Name' },
+  { id: 'all_authors', label: 'All Authors' },
   { id: 'title', label: 'Title' },
+  { id: 'venue', label: 'Journal/Conference' },
   { id: 'year', label: 'Year' },
   { id: 'pub_type', label: 'Publication Type' },
-  { id: 'link', label: 'Link' },
-  { id: 'cited_by', label: 'Citations' }
+  { id: 'link', label: 'Link' }
 ]
 
 function ExportModal({ isOpen, onClose, filters }) {
@@ -17,8 +17,6 @@ function ExportModal({ isOpen, onClose, filters }) {
   )
   const [exporting, setExporting] = useState(false)
   const [exportError, setExportError] = useState(null)
-
-  if (!isOpen) return null
 
   const handleToggle = (id) => {
     setSelectedFields(prev => ({ ...prev, [id]: !prev[id] }))
@@ -66,43 +64,45 @@ function ExportModal({ isOpen, onClose, filters }) {
 
   return (
     <AnimatePresence>
-      <div className="modal-overlay" onClick={onClose}>
+      {isOpen && (
         <motion.div 
-          className="modal-content"
-          onClick={(e) => e.stopPropagation()}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
+          className="export-inline-wrapper"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
         >
-          <h2>Export Data</h2>
-          <p>Select the fields you want to include in the export.</p>
-          
-          <div className="field-selection">
-            {AVAILABLE_FIELDS.map(field => (
-              <label key={field.id} className="field-checkbox">
-                <input 
-                  type="checkbox"
-                  checked={selectedFields[field.id]}
-                  onChange={() => handleToggle(field.id)}
-                />
-                {field.label}
-              </label>
-            ))}
-          </div>
+          <div className="export-inline-card">
+            <h2>Export Data</h2>
+            <p>Select the fields you want to include in the export.</p>
+            
+            <div className="export-field-selection">
+              {AVAILABLE_FIELDS.map(field => (
+                <label key={field.id} className={`export-field-checkbox ${selectedFields[field.id] ? 'checked' : ''}`}>
+                  <input 
+                    type="checkbox"
+                    checked={selectedFields[field.id]}
+                    onChange={() => handleToggle(field.id)}
+                  />
+                  {field.label}
+                </label>
+              ))}
+            </div>
 
-          {exportError && <div className="export-error" style={{color: 'red', marginTop: '10px'}}>{exportError}</div>}
+            {exportError && <div className="export-error" style={{ color: '#FF6B6B', marginBottom: '16px', fontSize: '14px', padding: '12px', background: 'rgba(255, 107, 107, 0.1)', borderRadius: '8px', border: '1px solid rgba(255, 107, 107, 0.2)' }}>{exportError}</div>}
 
-          <div className="modal-actions" style={{ marginTop: '20px', display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-            <button className="secondary-button" onClick={onClose} disabled={exporting}>Cancel</button>
-            <button className="primary-button" onClick={handleExportExcel} disabled={exporting}>
-              {exporting ? 'Exporting...' : 'Export Excel'}
-            </button>
-            <button className="primary-button" onClick={handleExportPdf} disabled={exporting}>
-              {exporting ? 'Exporting...' : 'Export PDF'}
-            </button>
+            <div className="export-actions">
+              <button className="secondary-button" onClick={onClose} disabled={exporting}>Cancel</button>
+              <button className="primary-button" onClick={handleExportExcel} disabled={exporting}>
+                {exporting ? 'Exporting...' : 'Export Excel'}
+              </button>
+              <button className="primary-button" onClick={handleExportPdf} disabled={exporting}>
+                {exporting ? 'Exporting...' : 'Export PDF'}
+              </button>
+            </div>
           </div>
         </motion.div>
-      </div>
+      )}
     </AnimatePresence>
   )
 }

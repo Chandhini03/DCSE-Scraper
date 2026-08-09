@@ -73,33 +73,39 @@ function Dashboard() {
         />
         {metaError && <div className="meta-error">{metaError}</div>}
         <div className="column-grid">
-          <PublicationColumn
-            title="Journals"
-            accentClass="journal-column"
-            data={journalData}
-            onLoadMore={loadMore}
-            type="journal"
-            expandedColumn={expandedColumn}
-            setExpandedColumn={setExpandedColumn}
-          />
-          <PublicationColumn
-            title="Conferences"
-            accentClass="conference-column"
-            data={conferenceData}
-            onLoadMore={loadMore}
-            type="conference"
-            expandedColumn={expandedColumn}
-            setExpandedColumn={setExpandedColumn}
-          />
-          <PublicationColumn
-            title="Books"
-            accentClass="book-column"
-            data={bookData}
-            onLoadMore={loadMore}
-            type="book"
-            expandedColumn={expandedColumn}
-            setExpandedColumn={setExpandedColumn}
-          />
+          {(!filters.pubType || filters.pubType === 'journal') && (
+            <PublicationColumn
+              title="Journals"
+              accentClass="journal-column"
+              data={journalData}
+              onLoadMore={loadMore}
+              type="journal"
+              expandedColumn={expandedColumn}
+              setExpandedColumn={setExpandedColumn}
+            />
+          )}
+          {(!filters.pubType || filters.pubType === 'conference') && (
+            <PublicationColumn
+              title="Conferences"
+              accentClass="conference-column"
+              data={conferenceData}
+              onLoadMore={loadMore}
+              type="conference"
+              expandedColumn={expandedColumn}
+              setExpandedColumn={setExpandedColumn}
+            />
+          )}
+          {(!filters.pubType || filters.pubType === 'book') && (
+            <PublicationColumn
+              title="Books"
+              accentClass="book-column"
+              data={bookData}
+              onLoadMore={loadMore}
+              type="book"
+              expandedColumn={expandedColumn}
+              setExpandedColumn={setExpandedColumn}
+            />
+          )}
         </div>
       </div>
     </div>

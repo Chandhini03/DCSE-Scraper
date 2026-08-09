@@ -101,10 +101,12 @@ def save_to_mongodb(authors_data):
                 {"$set": {
                     "author_id": author_id,
                     "author_name": author["name"],
+                    "all_authors": article.get("all_authors"),
                     "title": title,
                     "year": article.get("year"),
                     "cited_by": article.get("cited_by", 0),
                     "pub_type": article.get("pub_type", "unknown"),
+                    "venue": article.get("venue"),
                     "link": article.get("link"),
                     "scraped_at": datetime.now(timezone.utc),
                 }},
@@ -138,13 +140,32 @@ def scrape_author(author_id):
 
         articles = []
         for pub in author.get("publications", []):
-            bib = pub.get("bib", {})
+            try:
+                filled_pub = scholarly.fill(pub)
+            except Exception:
+                filled_pub = pub
+
+            bib = filled_pub.get("bib", {})
             title = bib.get("title", "Unknown Title")
             year_str = bib.get("pub_year", None)
             year = int(year_str) if year_str and str(year_str).isdigit() else None
-            cited_by = pub.get("num_citations", 0)
-            link = pub.get("pub_url", None)
+            cited_by = filled_pub.get("num_citations", 0)
+            link = filled_pub.get("pub_url", None)
+            
+            # Extract venue and all_authors
+            venue = bib.get("journal") or bib.get("conference") or bib.get("venue")
+            if not venue and "citation" in bib:
+                # Fallback to splitting citation string
+                parts = bib["citation"].split(',')
+                if parts:
+                    venue = parts[0].strip()
+            
+            all_authors = bib.get("author")
+            
+            # If pub_type is unknown from title, try inferring from venue
             pub_type = infer_pub_type(title)
+            if pub_type == "unknown" and venue:
+                pub_type = infer_pub_type(venue)
 
             articles.append({
                 "title": title,
@@ -152,6 +173,8 @@ def scrape_author(author_id):
                 "cited_by": cited_by,
                 "pub_type": pub_type,
                 "link": link,
+                "venue": venue,
+                "all_authors": all_authors,
             })
 
         print(f"  Name: {name}")

@@ -13,6 +13,7 @@ const defaultFilters = {
   minCitations: '',
   sortBy: 'cited_by',
   order: 'desc',
+  pubType: '',
 }
 
 const initialColumnState = {
@@ -36,6 +37,7 @@ const buildParams = (filters, extra = {}) => {
   if (filters.yearFrom) params.year_from = filters.yearFrom
   if (filters.yearTo) params.year_to = filters.yearTo
   if (filters.minCitations) params.min_citations = filters.minCitations
+  if (filters.pubType) params.pub_type = filters.pubType
 
   return params
 }

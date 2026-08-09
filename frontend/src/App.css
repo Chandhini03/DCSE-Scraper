@@ -1,13 +1,12 @@
 .app-shell {
   min-height: 100vh;
-  background: #f3f4f6;
-  color: #1f2937;
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: transparent;
+  color: #ffffff;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 body {
   margin: 0;
-  background: #eef2f7;
 }
 
 #root {
@@ -17,11 +16,13 @@ body {
 }
 
 .app-header {
-  background: #1a2744;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
   color: #ffffff;
   padding: 28px 24px;
   border-radius: 16px;
-  box-shadow: 0 18px 40px rgba(26, 39, 68, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3);
 }
 
 .header-top {
@@ -104,19 +105,20 @@ body {
 }
 
 .filter-bar {
-  background: #f8fafc;
-  border: 1px solid #dbe4ee;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-  margin-bottom: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  margin-bottom: 28px;
 }
 
 .filter-row {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .filter-row:last-child {
@@ -124,32 +126,43 @@ body {
 }
 
 .filter-bar label {
-  flex: 1 1 220px;
+  flex: 1 1 200px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   font-size: 14px;
-  color: #334155;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .filter-bar input,
 .filter-bar select {
   width: 100%;
   border-radius: 12px;
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 14px 16px;
   font-size: 14px;
-  color: #0f172a;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.filter-bar input:focus,
+.filter-bar select:focus {
+  outline: none;
+  border-color: rgba(43, 134, 255, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 3px rgba(43, 134, 255, 0.1);
 }
 
 .filter-row-actions {
   align-items: flex-end;
+  margin-top: 8px;
 }
 
 .filter-actions {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   flex: 1 1 280px;
   justify-content: flex-end;
 }
@@ -157,21 +170,42 @@ body {
 .primary-button,
 .secondary-button {
   border-radius: 12px;
-  padding: 12px 18px;
+  padding: 14px 22px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   border: none;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .primary-button {
-  background: #1a2744;
+  background: #2B86FF;
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(43, 134, 255, 0.3);
+}
+
+.primary-button:hover {
+  background: #1A75FF;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(43, 134, 255, 0.4);
 }
 
 .secondary-button {
-  background: #e2e8f0;
-  color: #1f2937;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
 .meta-error {
@@ -187,17 +221,18 @@ body {
 }
 
 .publication-column {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
   border-radius: 18px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
 }
 
 .column-header {
   padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .column-header h2 {
@@ -210,8 +245,8 @@ body {
   margin-top: 12px;
   align-items: center;
   justify-content: center;
-  background: #f1f5f9;
-  color: #334155;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 13px;
@@ -254,7 +289,8 @@ body {
   width: 100%;
   height: 100%;
   z-index: 1000;
-  background: #ffffff;
+  background: rgba(5, 8, 22, 0.95);
+  backdrop-filter: blur(20px);
   overflow-y: auto;
   padding: 24px;
   display: flex;
@@ -271,10 +307,10 @@ body {
 
 .publication-card {
   padding: 18px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
 .publication-title {
@@ -285,7 +321,7 @@ body {
 
 .publication-title a,
 .publication-title span {
-  color: #111827;
+  color: #ffffff;
   text-decoration: none;
 }
 
@@ -297,14 +333,14 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  color: #475569;
+  color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
 }
 
 .citation-pill {
   margin-left: auto;
-  background: #eef2ff;
-  color: #1d4ed8;
+  background: rgba(0, 240, 255, 0.1);
+  color: #00F0FF;
   padding: 6px 10px;
   border-radius: 999px;
   font-weight: 700;
@@ -313,7 +349,7 @@ body {
 .card-skeleton {
   height: 96px;
   border-radius: 14px;
-  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
 }
@@ -322,8 +358,8 @@ body {
 .column-empty {
   padding: 20px;
   border-radius: 14px;
-  background: #f8fafc;
-  color: #334155;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
 }
 
@@ -333,7 +369,7 @@ body {
 
 .load-more-button {
   width: 100%;
-  background: #1a2744;
+  background: #2B86FF;
   color: #ffffff;
   border: none;
   border-radius: 12px;
@@ -348,15 +384,15 @@ body {
 }
 
 .journal-column {
-  border-top: 4px solid #2563eb;
+  border-top: 4px solid #00F0FF;
 }
 
 .conference-column {
-  border-top: 4px solid #16a34a;
+  border-top: 4px solid #8A2BE2;
 }
 
 .book-column {
-  border-top: 4px solid #9333ea;
+  border-top: 4px solid #FF00FF;
 }
 
 @keyframes shimmer {
@@ -372,4 +408,89 @@ body {
   .column-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Export Inline Card Styles */
+.export-inline-wrapper {
+  overflow: hidden;
+  width: 100%;
+}
+
+.export-inline-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.export-inline-card h2 {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.export-inline-card p {
+  margin: 0 0 20px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+}
+
+.export-field-selection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 500px) {
+  .export-field-selection {
+    grid-template-columns: 1fr;
+  }
+}
+
+.export-field-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  user-select: none;
+}
+
+.export-field-checkbox:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.export-field-checkbox.checked {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.export-field-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2B86FF;
+  cursor: pointer;
+}
+
+.export-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }

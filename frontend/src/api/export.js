@@ -9,6 +9,7 @@ export const exportToExcel = async (filters) => {
     if (filters.yearTo) params.append('year_to', filters.yearTo)
     if (filters.year) params.append('year', filters.year)
     if (filters.minCitations) params.append('min_citations', filters.minCitations)
+    if (filters.pubType) params.append('pub_type', filters.pubType)
     params.append('sort_by', filters.sortBy || 'cited_by')
     params.append('order', filters.order || 'desc')
     
@@ -16,22 +17,32 @@ export const exportToExcel = async (filters) => {
       filters.fields.forEach(field => params.append('fields', field))
     }
     
-    const response = await client.get(`/export/excel?${params.toString()}`, {
-      responseType: 'blob'
-    })
+    const url = `${client.defaults.baseURL}/export/excel?${params.toString()}`
     
-    // Create blob link to download
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const response = await fetch(url)
+    
+    if (!response.ok) {
+      let errorMessage = 'Failed to export to Excel'
+      try {
+        const errorData = await response.json()
+        if (errorData.detail) errorMessage = errorData.detail
+      } catch (e) {
+        // Ignore JSON parse error on non-ok responses
+      }
+      throw new Error(errorMessage)
+    }
+    
+    const blob = await response.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.href = url
+    link.href = downloadUrl
     
-    // Extract filename from response headers if available
-    const contentDisposition = response.headers['content-disposition']
-    let filename = 'publications_export.xlsx'
+    const contentDisposition = response.headers.get('content-disposition')
+    let filename = 'DCSE_Publications.xlsx'
     if (contentDisposition) {
-      const match = contentDisposition.match(/filename=(.+)/)
+      const match = contentDisposition.match(/filename="?([^"]+)"?/)
       if (match) {
-        filename = match[1].replace(/"/g, '')
+        filename = match[1]
       }
     }
     
@@ -39,12 +50,12 @@ export const exportToExcel = async (filters) => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
+    window.URL.revokeObjectURL(downloadUrl)
     
     return { success: true, message: 'Excel file downloaded successfully' }
   } catch (error) {
-    const message = error?.response?.data?.detail || 'Failed to export to Excel'
-    throw new Error(message)
+    console.error("Export Excel error:", error);
+    throw new Error(error.message || 'Failed to export to Excel')
   }
 }
 
@@ -57,6 +68,7 @@ export const exportToPdf = async (filters) => {
     if (filters.yearTo) params.append('year_to', filters.yearTo)
     if (filters.year) params.append('year', filters.year)
     if (filters.minCitations) params.append('min_citations', filters.minCitations)
+    if (filters.pubType) params.append('pub_type', filters.pubType)
     params.append('sort_by', filters.sortBy || 'cited_by')
     params.append('order', filters.order || 'desc')
     
@@ -64,22 +76,32 @@ export const exportToPdf = async (filters) => {
       filters.fields.forEach(field => params.append('fields', field))
     }
     
-    const response = await client.get(`/export/pdf?${params.toString()}`, {
-      responseType: 'blob'
-    })
+    const url = `${client.defaults.baseURL}/export/pdf?${params.toString()}`
     
-    // Create blob link to download
-    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const response = await fetch(url)
+    
+    if (!response.ok) {
+      let errorMessage = 'Failed to export to PDF'
+      try {
+        const errorData = await response.json()
+        if (errorData.detail) errorMessage = errorData.detail
+      } catch (e) {
+        // Ignore JSON parse error on non-ok responses
+      }
+      throw new Error(errorMessage)
+    }
+    
+    const blob = await response.blob()
+    const downloadUrl = window.URL.createObjectURL(blob)
     const link = document.createElement('a')
-    link.href = url
+    link.href = downloadUrl
     
-    // Extract filename from response headers if available
-    const contentDisposition = response.headers['content-disposition']
-    let filename = 'publications_export.pdf'
+    const contentDisposition = response.headers.get('content-disposition')
+    let filename = 'DCSE_Publications.pdf'
     if (contentDisposition) {
-      const match = contentDisposition.match(/filename=(.+)/)
+      const match = contentDisposition.match(/filename="?([^"]+)"?/)
       if (match) {
-        filename = match[1].replace(/"/g, '')
+        filename = match[1]
       }
     }
     
@@ -87,11 +109,11 @@ export const exportToPdf = async (filters) => {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    window.URL.revokeObjectURL(url)
+    window.URL.revokeObjectURL(downloadUrl)
     
     return { success: true, message: 'PDF file downloaded successfully' }
   } catch (error) {
-    const message = error?.response?.data?.detail || 'Failed to export to PDF'
-    throw new Error(message)
+    console.error("Export PDF error:", error);
+    throw new Error(error.message || 'Failed to export to PDF')
   }
 }

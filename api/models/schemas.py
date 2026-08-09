@@ -24,10 +24,12 @@ class PublicationOut(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
     author_id: str
     author_name: str
+    all_authors: Optional[str] = None
     title: str
     year: Optional[int] = None
     cited_by: Optional[int] = 0
     pub_type: Optional[str] = "unknown"   # journal / conference / book / unknown
+    venue: Optional[str] = None
     link: Optional[str] = None
     scraped_at: Optional[datetime] = None
 
