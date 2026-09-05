@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from api.core.database import connect_db, disconnect_db
-from api.routes import authors, publications, scrape, stats, export
+from api.routes import authors, publications, scrape, stats, export, webhook
 
 
 @asynccontextmanager
@@ -33,6 +33,7 @@ app.include_router(publications.router, prefix="/publications", tags=["Publicati
 app.include_router(scrape.router,       prefix="/scrape",       tags=["Scraper"])
 app.include_router(stats.router,        prefix="/stats",        tags=["Stats"])
 app.include_router(export.router,       prefix="/export",       tags=["Export"])
+app.include_router(webhook.router,      prefix="/webhook",      tags=["Webhook"])
 
 
 @app.get("/", tags=["Health"])
